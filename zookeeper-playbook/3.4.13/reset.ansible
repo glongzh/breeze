@@ -1,0 +1,11 @@
+- name: clean lb
+  hosts: hosts
+  user: root
+  tasks:
+  - name: remove jdk and zookeeper file
+    file:
+      path: '{{ item }}'
+      state: absent
+    with_items:
+    - /usr/local/jdk
+    - /usr/local/zookeeper

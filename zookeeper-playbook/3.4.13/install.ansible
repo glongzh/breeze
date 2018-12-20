@@ -1,0 +1,52 @@
+- name: install jdk
+  hosts: hosts
+  user: root
+  vars:
+    jdkFile: jdk-8u191-linux-x64.tar.gz
+    zooFile: zookeeper-3.4.13.tar.gz
+  tasks:
+  - name: copy file to /usr/local
+    copy:
+      src: {{ item }}
+      dest: /usr/local
+    with_items:
+      - 'file/{{ jdkFile }}'
+      - 'file/{{ zooFile }}'
+
+  - name: extract tar file
+    shell: mkdir -p {{ item.dest }} && tar xzf {{ item.src }} -C {{ item.dest }} --strip-components=1
+    args: 
+      chdir: /usr/local/
+    with_items:
+      - {src: '{{ jdkFile }}', dest: 'jdk'}
+      - {src: '{{ zooFile }}', dest: 'zookeeper'}
+
+  - name: set java env varibles
+    shell: /bin/echo {{ item }} >> /etc/profile && source /etc/profile
+    with_items:
+      - export JAVA_HOME=/usr/local/java
+      - export JRE_HOME=/usr/local/java/jre
+      - export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:\$JRE_HOME/lib:\$CLASSPATH
+      - export PATH=\$JAVA_HOME/bin:\$PATH
+  
+  - name: get port
+    set_fact:
+      ports: |
+        {% set ports = ports | d([]) + ['{0}:{1}'.format(item.target, item.port + 1)] %}
+        {{ ports | list }}
+    with_items:
+    - "{{ servers | d([], true) | list }}"
+    run_once: true
+
+  - name: run keepalived
+    docker_container:
+      name: keepalived
+      network_mode: host
+      restart_policy: unless-stopped
+      capabilities: NET_ADMIN
+      image: wise2c/k8s-keepalived:1.3.5
+      entrypoint: /bin/bash
+      command: /usr/bin/keepalived.sh
+      volumes:
+      - '{{ cpath }}/keepalive.cfg:/etc/keepalived/keepalived.conf'
+      - '{{ cpath }}/keepalived.sh:/usr/bin/keepalived.sh'

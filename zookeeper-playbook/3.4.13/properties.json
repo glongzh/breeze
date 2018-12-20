@@ -1,0 +1,10 @@
+[
+    {
+        "variable": "self",
+        "label": "test",
+        "description": "test desc",
+        "type": "host",
+        "default": "",
+        "required": false
+    }
+]
