@@ -7,24 +7,58 @@
   tasks:
   - name: copy file to /usr/local
     copy:
-      src: {{ item }}
+      src: '{{ item }}'
       dest: /usr/local
     with_items:
       - 'file/{{ jdkFile }}'
       - 'file/{{ zooFile }}'
 
   - name: extract tar file
-    shell: mkdir -p {{ item.dest }} && tar xzf {{ item.src }} -C {{ item.dest }} --strip-components=1
+    shell: mkdir -p '{{ item.dest }}' && tar xzf '{{ item.src }}' -C '{{ item.dest }}' --strip-components=1
     args: 
       chdir: /usr/local/
     with_items:
       - {src: '{{ jdkFile }}', dest: 'jdk'}
       - {src: '{{ zooFile }}', dest: 'zookeeper'}
 
-  - name: set java env varibles
-    shell: /bin/echo {{ item }} >> /etc/profile && source /etc/profile
+  - name: delete tar file
+    file:
+      path: '{{ item }}'
+      state: absent
     with_items:
-      - export JAVA_HOME=/usr/local/java
-      - export JRE_HOME=/usr/local/java/jre
-      - export CLASSPATH=.:\$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:\$JRE_HOME/lib:\$CLASSPATH
-      - export PATH=\$JAVA_HOME/bin:\$PATH
+      - /usr/local/{{ jdkFile }}
+      - /usr/local/{{ zooFile }}
+
+  - name: set env varibles
+    shell: /bin/echo '{{ item }}' >> /etc/profile && source /etc/profile
+    with_items:
+      - export JAVA_HOME=/usr/local/jdk
+      - export JRE_HOME=${JAVA_HOME}/jre
+      - export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+      - export ZOOKEEPER_HOME=/usr/local/zookeeper
+      - export PATH=${JAVA_HOME}/bin:${ZOOKEEPER_HOME}/bin:$PATH
+
+  - name: copy zoo config file
+    template:
+      src: '{{ item.src }}'
+      dest: '{{ item.dest }}'
+    with_items:
+      - { src: 'template/zoo.cfg.j2', dest: '/usr/local/zookeeper/conf/zoo.cfg' }
+
+  - name: generate myid
+    shell: mkdir /usr/local/zookeeper/data && /bin/echo '{{ item.id }}' >> /usr/local/zookeeper/data/myid
+    with_items: '{{ servers }}'
+    when: '{{ item.ip }}' == '{{ ansible_default_ipv4.address }}'
+
+  - name: start zookeeper
+    shell: /usr/local/zookeeper/bin/zkServer.sh start
+    environment:
+      JAVA_HOME: /usr/local/jdk
+      JRE_HOME: /usr/local/jdk/jre
+      CLASSPATH: .:/usr/local/jdk/lib:/usr/local/jdk/jre/lib
+      ZOOKEEPER_HOME: /usr/local/zookeeper
+      PATH: /usr/local/jdk/bin:/usr/local/zookeeper/bin:{{ ansible_env.PATH }}
+
+
+
+  

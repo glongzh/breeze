@@ -1,7 +1,10 @@
-- name: clean lb
+- name: clean zookeeper
   hosts: hosts
   user: root
   tasks:
+  - name: stop zookeeper
+  shell: /usr/local/zookeeper/bin/zkServer.sh stop
+
   - name: remove jdk and zookeeper file
     file:
       path: '{{ item }}'

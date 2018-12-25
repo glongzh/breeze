@@ -1,0 +1,5 @@
+servers:
+{{ range $k, $v := .zookeeper.Hosts.self -}}
+- ip: {{ $v.IP }}
+  id: {{ $k }}
+{{ end }}

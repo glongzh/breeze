@@ -1,4 +1,4 @@
 [hosts]
-{{ range $v := .loadbalancer.Hosts.self -}}
+{{ range $v := .zookeeper.Hosts.self -}}
 {{ $v.IP }}
 {{ end }}

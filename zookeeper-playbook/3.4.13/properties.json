@@ -1,10 +1,10 @@
 [
     {
         "variable": "self",
-        "label": "test",
-        "description": "test desc",
+        "label": "hosts",
+        "description": "hosts to install zookeeper",
         "type": "host",
         "default": "",
-        "required": false
+        "required": true
     }
 ]
