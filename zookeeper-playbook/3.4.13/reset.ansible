@@ -12,3 +12,15 @@
     with_items:
     - /usr/local/jdk
     - /usr/local/zookeeper
+
+  - name: delete /etc/profile variables
+    lineinfile: 
+      path: /etc/profile
+      state: absent
+      regexp: '{{ item }}'
+    with_items:
+    - export JAVA_HOME=
+    - export JRE_HOME=
+    - export CLASSPATH=
+    - export ZOOKEEPER_HOME=
+    - export PATH=\${JAVA_HOME}

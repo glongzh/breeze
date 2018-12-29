@@ -30,7 +30,10 @@
       - /usr/local/{{ zooFile }}
 
   - name: set env varibles
-    shell: /bin/echo '{{ item }}' >> /etc/profile && source /etc/profile
+    lineinfile:
+      path: /etc/profile
+      state: present
+      line: '{{ item }}'
     with_items:
       - export JAVA_HOME=/usr/local/jdk
       - export JRE_HOME=${JAVA_HOME}/jre
@@ -48,7 +51,7 @@
   - name: generate myid
     shell: mkdir /usr/local/zookeeper/data && /bin/echo '{{ item.id }}' >> /usr/local/zookeeper/data/myid
     with_items: '{{ servers }}'
-    when: '{{ item.ip }}' == '{{ ansible_default_ipv4.address }}'
+    when: "'{{ item.ip }}' == '{{ ansible_default_ipv4.address }}'"
 
   - name: start zookeeper
     shell: /usr/local/zookeeper/bin/zkServer.sh start
