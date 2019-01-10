@@ -3,7 +3,7 @@
   user: root
   vars:
     jdkFile: jdk-8u191-linux-x64.tar.gz
-    zooFile: zookeeper-3.4.13.tar.gz
+    zooFile: zookeeper-{{ version }}.tar.gz
   tasks:
   - name: copy file to /usr/local
     copy:

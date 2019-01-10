@@ -12,12 +12,14 @@ keepalived_version=1.3.5
 loadbalancer_version=HAProxy-${haproxy_version}_Keepalived-${keepalived_version}
 prometheus_version=2.5.0
 prometheus_operator_version=0.26.0
+zookeeper_version=3.4.13
 
 mv ${path}/kubernetes-playbook/version ${path}/kubernetes-playbook/v${kubernetes_version}
 mv ${path}/harbor-playbook/version ${path}/harbor-playbook/v${harbor_version}
 mv ${path}/docker-playbook/version ${path}/docker-playbook/${docker_version}-CE
 mv ${path}/loadbalancer-playbook/version ${path}/loadbalancer-playbook/${loadbalancer_version}
 mv ${path}/prometheus-playbook/version ${path}/prometheus-playbook/v${prometheus_version}
+mv ${path}/zookeeper-playbook/version ${path}/zookeeper-playbook/v${zookeeper_version}
 
 docker run --rm --name=kubeadm-version wise2c/kubeadm-version:v${kubernetes_version} kubeadm config images list --kubernetes-version ${kubernetes_version} > ${path}/k8s-images-list.txt
 
@@ -31,6 +33,7 @@ echo "HAProxy Version: ${haproxy_version}" >> ${path}/components-version.txt
 echo "Keepalived Version: ${keepalived_version}" >> ${path}/components-version.txt
 echo "Prometheus Version: ${prometheus_version}" >> ${path}/components-version.txt
 echo "PrometheusOperator Version: ${prometheus_operator_version}" >> ${path}/components-version.txt
+echo "Zookeeper Version: ${zookeeper_version}" >> ${path}/components-version.txt
 
 for dir in `ls ${path}`
 do
